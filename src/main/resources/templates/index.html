@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Телефонная сеть</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1> Телефонная сеть</h1>
+        <div class="header-controls">
+            <button id="add-phone-btn" class="btn btn-add">+ Добавить телефон</button>
+            <button id="delete-phone-btn" class="btn btn-delete-control">- Удалить телефон</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="phones-container" class="phones-grid">
+            <div class="loading">Загрузка телефонов...</div>
+        </div>
+    </main>
+
+    <div id="error-toast" class="toast hidden"></div>
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
