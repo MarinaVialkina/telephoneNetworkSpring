@@ -1,11 +1,9 @@
 package phone.network.controller;
 
-import phone.network.dto.CallRequest;
 import phone.network.dto.CreatePhoneRequest;
 import phone.network.dto.PhoneDTO;
-import phone.network.model.Phone;
 import phone.network.model.CallResult;
-import phone.network.service.CallService;
+import phone.network.model.Phone;
 import phone.network.service.PhoneManagementService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +16,12 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class PhoneController {
     private final PhoneManagementService phoneManagementService;
-    private final CallService callService;
 
-    public PhoneController(PhoneManagementService phoneManagementService, CallService callService) {
+    public PhoneController(PhoneManagementService phoneManagementService) {
         this.phoneManagementService = phoneManagementService;
-        this.callService = callService;
     }
 
-    // CRUD операции - через PhoneManagementService
+    // ТОЛЬКО CRUD операции
     @GetMapping
     public ResponseEntity<List<PhoneDTO>> getAllPhones() {
         return ResponseEntity.ok(phoneManagementService.getAllPhones());
@@ -37,7 +33,6 @@ public class PhoneController {
         if (newPhone == null) {
             return ResponseEntity.badRequest().body(new CallResult(false, "Телефон уже существует"));
         }
-
         PhoneDTO phoneDTO = PhoneDTO.fromEntity(newPhone);
         return ResponseEntity.ok(phoneDTO);
     }
@@ -49,27 +44,5 @@ public class PhoneController {
             return ResponseEntity.ok(new CallResult(true, "Телефон удален"));
         }
         return ResponseEntity.badRequest().body(new CallResult(false, "Телефон не найден"));
-    }
-
-    // Call операции - напрямую через CallService
-    @PostMapping("/{phoneNumber}/call")
-    public ResponseEntity<CallResult> makeCall(
-            @PathVariable String phoneNumber,
-            @Valid @RequestBody CallRequest request) {
-
-        CallResult result = callService.initiateCall(phoneNumber, request.getTargetNumber());
-        return ResponseEntity.ok(result);
-    }
-
-    @PostMapping("/{phoneNumber}/answer")
-    public ResponseEntity<CallResult> answerCall(@PathVariable String phoneNumber) {
-        CallResult result = callService.answerCall(phoneNumber);
-        return ResponseEntity.ok(result);
-    }
-
-    @PostMapping("/{phoneNumber}/terminate")
-    public ResponseEntity<CallResult> terminateCall(@PathVariable String phoneNumber) {
-        CallResult result = callService.terminateCall(phoneNumber);
-        return ResponseEntity.ok(result);
     }
 }

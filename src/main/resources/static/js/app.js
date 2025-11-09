@@ -153,8 +153,9 @@ class PhoneNetworkApp {
 
     async handleAction(phoneNumber, action) {
         try {
-            let url = `${this.baseUrl}/${phoneNumber}`;
-            let response; // ОБЪЯВИ ПЕРЕМЕННУЮ ЗДЕСЬ
+            let url;
+            let body = null;
+            let response; // ДОБАВЬ ЭТУ СТРОКУ
 
             switch(action) {
                 case 'call':
@@ -165,26 +166,25 @@ class PhoneNetworkApp {
                         return;
                     }
 
-                    response = await fetch(url + '/call', { // ИСПРАВЬ URL
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ targetNumber: targetNumber })
-                    });
+                    url = `/api/calls/${phoneNumber}/to/${targetNumber}`;
                     break;
+
                 case 'answer':
-                    response = await fetch(url + '/answer', { method: 'POST' });
+                    url = `/api/calls/${phoneNumber}/answer`;
                     break;
+
                 case 'terminate':
-                    response = await fetch(url + '/terminate', { method: 'POST' });
+                    url = `/api/calls/${phoneNumber}/terminate`;
                     break;
-                default:
-                    console.warn('Неизвестное действие:', action);
-                    return;
             }
 
-            const result = await response.json(); // УБЕРИ ПОВТОРНОЕ ОБЪЯВЛЕНИЕ
+            response = await fetch(url, { // УБЕРИ const - используй существующую переменную
+                method: 'POST',
+                headers: body ? { 'Content-Type': 'application/json' } : {},
+                body: body
+            });
+
+            const result = await response.json(); // УБЕРИ const - переменная уже объявлена
 
             if (!result.success) {
                 this.showError(result.message);
