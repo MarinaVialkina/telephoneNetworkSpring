@@ -1,10 +1,12 @@
 package phone.network.service;
 
 import org.springframework.stereotype.Service;
+import phone.network.dto.PhoneDTO;
 import phone.network.model.Phone;
 import phone.network.repository.PhoneRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PhoneManagementServiceImpl implements PhoneManagementService{
@@ -15,13 +17,15 @@ public class PhoneManagementServiceImpl implements PhoneManagementService{
     }
 
         @Override
-    public Phone getPhone(String phoneNumber) {
-            return phoneRepository.findById(phoneNumber).orElse(null);
+    public PhoneDTO getPhone(String phoneNumber) {
+            return phoneRepository.findById(phoneNumber).map(PhoneDTO::fromEntity).orElse(null);
     }
 
     @Override
-    public List<Phone> getAllPhones() {
-        return phoneRepository.findAll();
+    public List<PhoneDTO> getAllPhones() {
+        return phoneRepository.findAll().stream()
+                .map(PhoneDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

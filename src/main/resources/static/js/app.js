@@ -154,6 +154,7 @@ class PhoneNetworkApp {
     async handleAction(phoneNumber, action) {
         try {
             let url = `${this.baseUrl}/${phoneNumber}`;
+            let response; // ОБЪЯВИ ПЕРЕМЕННУЮ ЗДЕСЬ
 
             switch(action) {
                 case 'call':
@@ -163,21 +164,27 @@ class PhoneNetworkApp {
                         this.showError('Нельзя звонить на свой же номер');
                         return;
                     }
-                    url += `/call?targetNumber=${encodeURIComponent(targetNumber)}`;
+
+                    response = await fetch(url + '/call', { // ИСПРАВЬ URL
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ targetNumber: targetNumber })
+                    });
                     break;
                 case 'answer':
-                    url += '/answer';
+                    response = await fetch(url + '/answer', { method: 'POST' });
                     break;
                 case 'terminate':
-                    url += '/terminate';
+                    response = await fetch(url + '/terminate', { method: 'POST' });
                     break;
                 default:
                     console.warn('Неизвестное действие:', action);
                     return;
             }
 
-            const response = await fetch(url, { method: 'POST' });
-            const result = await response.json();
+            const result = await response.json(); // УБЕРИ ПОВТОРНОЕ ОБЪЯВЛЕНИЕ
 
             if (!result.success) {
                 this.showError(result.message);
@@ -198,28 +205,20 @@ class PhoneNetworkApp {
         const phoneNumber = prompt('Введите номер нового телефона:');
         if (!phoneNumber) return;
 
-        if (!/^\d{4,}$/.test(phoneNumber)) {
-            this.showError('Номер телефона должен содержать только цифры (минимум 4)');
-            return;
-        }
-
         try {
-            const response = await fetch(this.baseUrl + `?phoneNumber=${encodeURIComponent(phoneNumber)}`, {
+            const response = await fetch(this.baseUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                body: JSON.stringify({ phoneNumber: phoneNumber })
             });
 
             if (response.ok) {
                 const newPhone = await response.json();
-                if (newPhone) {
-                    this.showSuccess(`Телефон ${phoneNumber} добавлен успешно`);
-                    await this.loadPhones();
-                    this.renderPhones();
-                } else {
-                    this.showError('Не удалось добавить телефон');
-                }
+                this.showSuccess(`Телефон ${phoneNumber} добавлен успешно`);
+                await this.loadPhones();
+                this.renderPhones();
             } else {
                 const result = await response.json();
                 this.showError(result.message || 'Ошибка добавления телефона');

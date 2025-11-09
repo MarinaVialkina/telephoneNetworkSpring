@@ -1,13 +1,13 @@
 package phone.network.service;
 
-import phone.network.model.CallResult;
+import phone.network.dto.PhoneDTO;
 import phone.network.model.Phone;
 
 import java.util.List;
 
 public interface PhoneManagementService {
-    Phone getPhone(String phoneNumber);
-    List<Phone> getAllPhones();
+    PhoneDTO getPhone(String phoneNumber);
+    List<PhoneDTO> getAllPhones();
     Phone addPhone(String phoneNumber);
     boolean deletePhone(String phoneNumber);
 }
