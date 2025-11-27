@@ -2,18 +2,25 @@ package phone.network.service;
 
 import org.springframework.stereotype.Service;
 import phone.network.dto.PhoneDTO;
+import phone.network.events.PhonesUpdatedEvent;
 import phone.network.model.Phone;
 import phone.network.repository.PhoneRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
+
 @Service
 public class PhoneManagementServiceImpl implements PhoneManagementService{
     private final PhoneRepository phoneRepository;
 
-    public PhoneManagementServiceImpl(PhoneRepository phoneRepository) {
+    private final ApplicationEventPublisher eventPublisher; // ← НОВОЕ ПОЛЕ
+
+    public PhoneManagementServiceImpl(PhoneRepository phoneRepository,
+                                      ApplicationEventPublisher eventPublisher) { // ← НОВЫЙ ПАРАМЕТР
         this.phoneRepository = phoneRepository;
+        this.eventPublisher = eventPublisher;
     }
 
         @Override
@@ -34,14 +41,20 @@ public class PhoneManagementServiceImpl implements PhoneManagementService{
             return null;
         }
         Phone newPhone = new Phone(phoneNumber);
-        return phoneRepository.save(newPhone);
+        Phone savedPhone = phoneRepository.save(newPhone);
 
+        eventPublisher.publishEvent(new PhonesUpdatedEvent(this)); // ← ОДНА СТРОКА
+
+        return savedPhone;
     }
 
     @Override
     public boolean deletePhone(String phoneNumber) {
         if (phoneRepository.existsById(phoneNumber)){
             phoneRepository.deleteById(phoneNumber);
+
+            eventPublisher.publishEvent(new PhonesUpdatedEvent(this)); // ← ОДНА СТРОКА
+
             return true;
         }
         return false;

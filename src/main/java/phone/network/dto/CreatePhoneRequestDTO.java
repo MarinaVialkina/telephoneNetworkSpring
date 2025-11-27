@@ -3,15 +3,15 @@ package phone.network.dto;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
-public class CreatePhoneRequest {
+public class CreatePhoneRequestDTO {
     @NotBlank(message = "Номер телефона обязателен")
     @Pattern(regexp = "\\d{4,}", message = "Номер должен содержать только цифры (минимум 4)")
     private String phoneNumber;
 
-    public CreatePhoneRequest() {
+    public CreatePhoneRequestDTO() {
     }
 
-    public CreatePhoneRequest(String phoneNumber) {
+    public CreatePhoneRequestDTO(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 

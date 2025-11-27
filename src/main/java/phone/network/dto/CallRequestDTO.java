@@ -3,26 +3,26 @@ package phone.network.dto;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
-public class CallRequest {
+public class CallRequestDTO {
     @NotBlank(message = "Номер звонящего обязателен")
     @Pattern(regexp = "\\d{4,}", message = "Номер должен содержать только цифры")
     private String callerNumber;
 
     @NotBlank(message = "Номер целевого абонента обязателен")
     @Pattern(regexp = "\\d{4,}", message = "Номер должен содержать только цифры")
-    private String targetNumber;
+    private String receiverNumber;
 
-    public CallRequest() {}
+    public CallRequestDTO() {}
 
-    public CallRequest(String callerNumber, String targetNumber) {
+    public CallRequestDTO(String callerNumber, String receiverNumber) {
         this.callerNumber = callerNumber;
-        this.targetNumber = targetNumber;
+        this.receiverNumber = receiverNumber;
     }
 
     // геттеры и сеттеры для обоих полей
     public String getCallerNumber() { return callerNumber; }
     public void setCallerNumber(String callerNumber) { this.callerNumber = callerNumber; }
 
-    public String getTargetNumber() { return targetNumber; }
-    public void setTargetNumber(String targetNumber) { this.targetNumber = targetNumber; }
+    public String getReceiverNumber() { return receiverNumber; }
+    public void setReceiverNumber(String receiverNumber) { this.receiverNumber = receiverNumber; }
 }

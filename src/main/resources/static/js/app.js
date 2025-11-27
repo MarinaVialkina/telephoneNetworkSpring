@@ -2,12 +2,13 @@ class PhoneNetworkApp {
     constructor() {
         this.phones = [];
         this.baseUrl = '/api/phones';
+        this.eventSource = null;
         this.init();
     }
 
     async init() {
         await this.loadPhones();
-        this.startPolling();
+        this.startSSE();
         this.renderPhones();
         this.attachGlobalEventListeners();
     }
@@ -22,11 +23,23 @@ class PhoneNetworkApp {
         }
     }
 
-    startPolling() {
-        setInterval(async () => {
-            await this.loadPhones();
+    startSSE() {
+        this.eventSource = new EventSource('/api/events/phones');
+
+        this.eventSource.addEventListener('phones-update', (event) => {
+            const updatedPhones = JSON.parse(event.data);
+            this.phones = updatedPhones;
             this.renderPhones();
-        }, 2000);
+            console.log('Phones updated via SSE');
+        });
+
+        this.eventSource.onopen = () => {
+            console.log('SSE connection established');
+        };
+
+        this.eventSource.onerror = (error) => {
+            console.error('SSE Error:', error);
+        };
     }
 
     renderPhones() {
@@ -68,7 +81,6 @@ class PhoneNetworkApp {
         return images[status] || '/images/phone.jpg';
     }
 
-
     getStatusText(status) {
         const statusTexts = {
             'FREE': 'Свободен',
@@ -106,7 +118,7 @@ class PhoneNetworkApp {
                     </button>
                 `;
             default:
-                return ''; // Пустой контейнер для действий
+                return '';
         }
     }
 
@@ -121,7 +133,6 @@ class PhoneNetworkApp {
     }
 
     attachGlobalEventListeners() {
-        // Кнопка добавления телефона
         const addButton = document.getElementById('add-phone-btn');
         if (addButton) {
             addButton.addEventListener('click', () => {
@@ -129,7 +140,6 @@ class PhoneNetworkApp {
             });
         }
 
-        // Кнопка удаления телефона из шапки
         const deleteButton = document.getElementById('delete-phone-btn');
         if (deleteButton) {
             deleteButton.addEventListener('click', () => {
@@ -138,7 +148,6 @@ class PhoneNetworkApp {
         }
     }
 
-    // Новый метод для удаления из шапки
     async deletePhoneFromHeader() {
         const phoneNumber = prompt('Введите номер телефона для удаления:');
         if (!phoneNumber) return;
@@ -155,7 +164,7 @@ class PhoneNetworkApp {
         try {
             let url;
             let body = null;
-            let response; // ДОБАВЬ ЭТУ СТРОКУ
+            let response;
 
             switch(action) {
                 case 'call':
@@ -178,13 +187,13 @@ class PhoneNetworkApp {
                     break;
             }
 
-            response = await fetch(url, { // УБЕРИ const - используй существующую переменную
+            response = await fetch(url, {
                 method: 'POST',
                 headers: body ? { 'Content-Type': 'application/json' } : {},
                 body: body
             });
 
-            const result = await response.json(); // УБЕРИ const - переменная уже объявлена
+            const result = await response.json();
 
             if (!result.success) {
                 this.showError(result.message);
@@ -192,8 +201,7 @@ class PhoneNetworkApp {
                 this.showSuccess('Действие выполнено успешно');
             }
 
-            await this.loadPhones();
-            this.renderPhones();
+
 
         } catch (error) {
             this.showError('Ошибка соединения с сервером');
@@ -217,8 +225,9 @@ class PhoneNetworkApp {
             if (response.ok) {
                 const newPhone = await response.json();
                 this.showSuccess(`Телефон ${phoneNumber} добавлен успешно`);
-                await this.loadPhones();
-                this.renderPhones();
+                // УБРАТЬ принудительное обновление - SSE сделает это автоматически
+                // await this.loadPhones();
+                // this.renderPhones();
             } else {
                 const result = await response.json();
                 this.showError(result.message || 'Ошибка добавления телефона');
@@ -240,8 +249,9 @@ class PhoneNetworkApp {
             const result = await response.json();
             if (result.success) {
                 this.showSuccess(`Телефон ${phoneNumber} удален`);
-                await this.loadPhones();
-                this.renderPhones();
+                // УБРАТЬ принудительное обновление - SSE сделает это автоматически
+                // await this.loadPhones();
+                // this.renderPhones();
             } else {
                 this.showError(result.message || 'Ошибка удаления телефона');
             }
@@ -268,6 +278,14 @@ class PhoneNetworkApp {
         setTimeout(() => {
             toast.classList.add('hidden');
         }, 5000);
+    }
+
+    // Опционально: метод для закрытия соединения при необходимости
+    destroy() {
+        if (this.eventSource) {
+            this.eventSource.close();
+            console.log('SSE connection closed');
+        }
     }
 }
 

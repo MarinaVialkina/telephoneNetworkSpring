@@ -24,10 +24,4 @@ public class Call {
         }
         return null;
     }
-
-    public String getCallerPhoneNumber() { return callerPhoneNumber; }
-    public void setCallerPhoneNumber(String callerPhoneNumber) { this.callerPhoneNumber = callerPhoneNumber; }
-
-    public String getReceiverPhoneNumber() { return receiverPhoneNumber; }
-    public void setReceiverPhoneNumber(String receiverPhoneNumber) { this.receiverPhoneNumber = receiverPhoneNumber; }
 }

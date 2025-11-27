@@ -2,19 +2,24 @@ package phone.network.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import phone.network.events.PhonesUpdatedEvent;
 import phone.network.model.Call;
 import phone.network.model.CallResult;
 import phone.network.model.Phone;
 import phone.network.model.PhoneStatuses;
 import phone.network.repository.PhoneRepository;
+import org.springframework.context.ApplicationEventPublisher;
 
 @Service
-public class CallServiceImpl implements CallService{
+public class CallServiceImpl implements CallService {
     private final PhoneRepository phoneRepository;
+    private final ApplicationEventPublisher eventPublisher; // ← НОВОЕ ПОЛЕ
 
-    public CallServiceImpl(PhoneRepository phoneRepository) {
+    public CallServiceImpl(PhoneRepository phoneRepository, ApplicationEventPublisher eventPublisher) { // ← НОВЫЙ ПАРАМЕТР
         this.phoneRepository = phoneRepository;
+        this.eventPublisher = eventPublisher;
     }
+
 
     @Override
     @Transactional
@@ -43,6 +48,8 @@ public class CallServiceImpl implements CallService{
         phoneRepository.save(caller);
         phoneRepository.save(receiver);
 
+        eventPublisher.publishEvent(new PhonesUpdatedEvent(this)); // ← ОДНА СТРОКА
+
         return new CallResult(true, "Успешно");
     }
 
@@ -53,6 +60,7 @@ public class CallServiceImpl implements CallService{
         if (phone != null && phone.getStatus() == PhoneStatuses.RINGING) {
             phone.setStatus(PhoneStatuses.BUSY);
             phoneRepository.save(phone);
+            eventPublisher.publishEvent(new PhonesUpdatedEvent(this)); // ← ОДНА СТРОКА
             return new CallResult(true, "Успешно");
         }
         return new CallResult(false, "Ошибка ответа на звонок");
@@ -65,19 +73,22 @@ public class CallServiceImpl implements CallService{
         if (phone1 != null && phone1.getCurrentCall() != null) {
             Call currentCall = phone1.getCurrentCall();
             String otherNumber = currentCall.getOtherNumber(phoneNumber);
+            Phone phone2 = phoneRepository.findById(otherNumber).orElse(null);
 
+            // СБРАСЫВАЕМ ПЕРВЫЙ ТЕЛЕФОН
             phone1.setStatus(PhoneStatuses.FREE);
             phone1.setCurrentCall(null);
             phoneRepository.save(phone1);
 
-            if (otherNumber != null) {
-                Phone phone2 = phoneRepository.findById(otherNumber).orElse(null);
-                if (phone2 != null) {
-                    phone2.setStatus(PhoneStatuses.FREE);
-                    phone2.setCurrentCall(null);
-                    phoneRepository.save(phone2);
-                }
+            // СБРАСЫВАЕМ ВТОРОЙ ТЕЛЕФОН (если существует)
+            if (phone2 != null) {
+                phone2.setStatus(PhoneStatuses.FREE); // ← ДОБАВИТЬ ЭТУ СТРОКУ!
+                phone2.setCurrentCall(null);
+                phoneRepository.save(phone2);
             }
+
+            eventPublisher.publishEvent(new PhonesUpdatedEvent(this));
+
             return new CallResult(true, "Успешно");
         }
         return new CallResult(false, "Ошибка сброса звонка");

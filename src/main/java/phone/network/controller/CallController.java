@@ -1,6 +1,6 @@
 package phone.network.controller;
 
-import phone.network.dto.CallRequest;
+import phone.network.dto.CallRequestDTO;
 import phone.network.model.CallResult;
 import phone.network.service.CallService;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,6 @@ public class CallController {
         this.callService = callService;
     }
 
-    // ТОЛЬКО Call операции
     @PostMapping("/{callerNumber}/to/{receiverNumber}")
     public ResponseEntity<CallResult> makeCall(
             @PathVariable String callerNumber,
@@ -42,9 +41,9 @@ public class CallController {
 
     // Альтернативный вариант с RequestBody
     @PostMapping("/initiate")
-    public ResponseEntity<CallResult> initiateCall(@Valid @RequestBody CallRequest request) {
+    public ResponseEntity<CallResult> initiateCall(@Valid @RequestBody CallRequestDTO request) {
         // В CallRequest добавить поле callerNumber
-        CallResult result = callService.initiateCall(request.getCallerNumber(), request.getTargetNumber());
+        CallResult result = callService.initiateCall(request.getCallerNumber(), request.getReceiverNumber());
         return ResponseEntity.ok(result);
     }
 }

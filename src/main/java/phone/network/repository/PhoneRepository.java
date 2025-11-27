@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PhoneRepository extends JpaRepository<Phone, String> {
-    // Spring Data JPA автоматически реализует основные методы
-    // findByPhoneNumber, save, delete, findAll и т.д.
 }

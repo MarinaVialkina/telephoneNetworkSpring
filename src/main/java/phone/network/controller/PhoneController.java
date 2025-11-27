@@ -1,6 +1,6 @@
 package phone.network.controller;
 
-import phone.network.dto.CreatePhoneRequest;
+import phone.network.dto.CreatePhoneRequestDTO;
 import phone.network.dto.PhoneDTO;
 import phone.network.model.CallResult;
 import phone.network.model.Phone;
@@ -28,7 +28,7 @@ public class PhoneController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addPhone(@Valid @RequestBody CreatePhoneRequest request) {
+    public ResponseEntity<?> addPhone(@Valid @RequestBody CreatePhoneRequestDTO request) {
         Phone newPhone = phoneManagementService.addPhone(request.getPhoneNumber());
         if (newPhone == null) {
             return ResponseEntity.badRequest().body(new CallResult(false, "Телефон уже существует"));
