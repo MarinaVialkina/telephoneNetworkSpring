@@ -13,9 +13,9 @@ import org.springframework.context.ApplicationEventPublisher;
 @Service
 public class CallServiceImpl implements CallService {
     private final PhoneRepository phoneRepository;
-    private final ApplicationEventPublisher eventPublisher; // ← НОВОЕ ПОЛЕ
+    private final ApplicationEventPublisher eventPublisher;
 
-    public CallServiceImpl(PhoneRepository phoneRepository, ApplicationEventPublisher eventPublisher) { // ← НОВЫЙ ПАРАМЕТР
+    public CallServiceImpl(PhoneRepository phoneRepository, ApplicationEventPublisher eventPublisher) {
         this.phoneRepository = phoneRepository;
         this.eventPublisher = eventPublisher;
     }
@@ -60,7 +60,7 @@ public class CallServiceImpl implements CallService {
         if (phone != null && phone.getStatus() == PhoneStatuses.RINGING) {
             phone.setStatus(PhoneStatuses.BUSY);
             phoneRepository.save(phone);
-            eventPublisher.publishEvent(new PhonesUpdatedEvent(this)); // ← ОДНА СТРОКА
+            eventPublisher.publishEvent(new PhonesUpdatedEvent(this));
             return new CallResult(true, "Успешно");
         }
         return new CallResult(false, "Ошибка ответа на звонок");
@@ -75,14 +75,12 @@ public class CallServiceImpl implements CallService {
             String otherNumber = currentCall.getOtherNumber(phoneNumber);
             Phone phone2 = phoneRepository.findById(otherNumber).orElse(null);
 
-            // СБРАСЫВАЕМ ПЕРВЫЙ ТЕЛЕФОН
             phone1.setStatus(PhoneStatuses.FREE);
             phone1.setCurrentCall(null);
             phoneRepository.save(phone1);
 
-            // СБРАСЫВАЕМ ВТОРОЙ ТЕЛЕФОН (если существует)
             if (phone2 != null) {
-                phone2.setStatus(PhoneStatuses.FREE); // ← ДОБАВИТЬ ЭТУ СТРОКУ!
+                phone2.setStatus(PhoneStatuses.FREE);
                 phone2.setCurrentCall(null);
                 phoneRepository.save(phone2);
             }

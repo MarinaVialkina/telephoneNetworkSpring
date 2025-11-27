@@ -19,7 +19,6 @@ public class CallRequestDTO {
         this.receiverNumber = receiverNumber;
     }
 
-    // геттеры и сеттеры для обоих полей
     public String getCallerNumber() { return callerNumber; }
     public void setCallerNumber(String callerNumber) { this.callerNumber = callerNumber; }
 

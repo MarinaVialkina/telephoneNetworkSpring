@@ -249,9 +249,7 @@ class PhoneNetworkApp {
             const result = await response.json();
             if (result.success) {
                 this.showSuccess(`Телефон ${phoneNumber} удален`);
-                // УБРАТЬ принудительное обновление - SSE сделает это автоматически
-                // await this.loadPhones();
-                // this.renderPhones();
+
             } else {
                 this.showError(result.message || 'Ошибка удаления телефона');
             }

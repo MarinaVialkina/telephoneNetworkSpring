@@ -10,7 +10,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/calls")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class CallController {
     private final CallService callService;
 
@@ -39,10 +39,8 @@ public class CallController {
         return ResponseEntity.ok(result);
     }
 
-    // Альтернативный вариант с RequestBody
     @PostMapping("/initiate")
     public ResponseEntity<CallResult> initiateCall(@Valid @RequestBody CallRequestDTO request) {
-        // В CallRequest добавить поле callerNumber
         CallResult result = callService.initiateCall(request.getCallerNumber(), request.getReceiverNumber());
         return ResponseEntity.ok(result);
     }

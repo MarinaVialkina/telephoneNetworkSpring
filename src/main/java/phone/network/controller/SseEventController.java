@@ -25,38 +25,29 @@ public class SseEventController {
         this.phoneManagementService = phoneManagementService;
     }
 
-    // Подключение клиента к SSE потоку
     @GetMapping(path = "/phones", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamPhones() {
-        SseEmitter emitter = new SseEmitter(60_000L); // 60 секунд timeout
+        SseEmitter emitter = new SseEmitter(60_000L);
 
         this.emitters.add(emitter);
-
-        // Отправляем начальное состояние при подключении
         sendPhoneUpdate(emitter);
 
-        // Обработчики отключения клиента
         emitter.onCompletion(() -> {
             this.emitters.remove(emitter);
-            System.out.println("SSE connection completed");
         });
 
         emitter.onTimeout(() -> {
             this.emitters.remove(emitter);
-            System.out.println("SSE connection timed out");
         });
 
         return emitter;
     }
 
-    // Обработчик события обновления телефонов
     @EventListener
     public void handlePhonesUpdated(PhonesUpdatedEvent event) {
-        System.out.println("Received PhonesUpdatedEvent, notifying " + emitters.size() + " clients");
         notifyAllClients();
     }
 
-    // Рассылка обновлений всем подключенным клиентам
     private void notifyAllClients() {
         List<PhoneDTO> phones = phoneManagementService.getAllPhones();
 
@@ -65,7 +56,6 @@ public class SseEventController {
         }
     }
 
-    // Отправка обновления конкретному клиенту
     private void sendPhoneUpdate(SseEmitter emitter) {
         List<PhoneDTO> phones = phoneManagementService.getAllPhones();
         sendPhoneUpdate(emitter, phones);
@@ -77,7 +67,6 @@ public class SseEventController {
                     .name("phones-update")
                     .data(phones));
         } catch (IOException e) {
-            // Клиент отключился - удаляем из списка
             emitter.completeWithError(e);
             emitters.remove(emitter);
         }

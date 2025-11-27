@@ -15,7 +15,6 @@ public class Phone {
     @Embedded
     private Call currentCall;
 
-    // Конструкторы
     public Phone() {}
 
     public Phone(String phoneNumber) {
@@ -29,7 +28,6 @@ public class Phone {
         this.currentCall = currentCall;
     }
 
-    // Геттеры и сеттеры - ПРОСТЫЕ И ЧИСТЫЕ
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 

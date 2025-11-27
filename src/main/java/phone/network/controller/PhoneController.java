@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/phones")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class PhoneController {
     private final PhoneManagementService phoneManagementService;
 
@@ -21,7 +21,6 @@ public class PhoneController {
         this.phoneManagementService = phoneManagementService;
     }
 
-    // ТОЛЬКО CRUD операции
     @GetMapping
     public ResponseEntity<List<PhoneDTO>> getAllPhones() {
         return ResponseEntity.ok(phoneManagementService.getAllPhones());

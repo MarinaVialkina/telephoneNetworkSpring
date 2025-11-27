@@ -15,10 +15,9 @@ import org.springframework.context.ApplicationEventPublisher;
 public class PhoneManagementServiceImpl implements PhoneManagementService{
     private final PhoneRepository phoneRepository;
 
-    private final ApplicationEventPublisher eventPublisher; // ← НОВОЕ ПОЛЕ
+    private final ApplicationEventPublisher eventPublisher;
 
-    public PhoneManagementServiceImpl(PhoneRepository phoneRepository,
-                                      ApplicationEventPublisher eventPublisher) { // ← НОВЫЙ ПАРАМЕТР
+    public PhoneManagementServiceImpl(PhoneRepository phoneRepository, ApplicationEventPublisher eventPublisher) {
         this.phoneRepository = phoneRepository;
         this.eventPublisher = eventPublisher;
     }
@@ -43,7 +42,7 @@ public class PhoneManagementServiceImpl implements PhoneManagementService{
         Phone newPhone = new Phone(phoneNumber);
         Phone savedPhone = phoneRepository.save(newPhone);
 
-        eventPublisher.publishEvent(new PhonesUpdatedEvent(this)); // ← ОДНА СТРОКА
+        eventPublisher.publishEvent(new PhonesUpdatedEvent(this));
 
         return savedPhone;
     }
@@ -53,7 +52,7 @@ public class PhoneManagementServiceImpl implements PhoneManagementService{
         if (phoneRepository.existsById(phoneNumber)){
             phoneRepository.deleteById(phoneNumber);
 
-            eventPublisher.publishEvent(new PhonesUpdatedEvent(this)); // ← ОДНА СТРОКА
+            eventPublisher.publishEvent(new PhonesUpdatedEvent(this));
 
             return true;
         }
