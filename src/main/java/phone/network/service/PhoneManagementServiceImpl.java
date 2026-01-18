@@ -1,6 +1,8 @@
 package phone.network.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import phone.network.dto.PhoneDTO;
 import phone.network.events.PhonesUpdatedEvent;
 import phone.network.model.Phone;
@@ -9,22 +11,22 @@ import phone.network.repository.PhoneRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.context.ApplicationEventPublisher;
-
 @Service
-public class PhoneManagementServiceImpl implements PhoneManagementService{
+public class PhoneManagementServiceImpl implements PhoneManagementService {
     private final PhoneRepository phoneRepository;
-
     private final ApplicationEventPublisher eventPublisher;
 
-    public PhoneManagementServiceImpl(PhoneRepository phoneRepository, ApplicationEventPublisher eventPublisher) {
+    public PhoneManagementServiceImpl(PhoneRepository phoneRepository,
+                                      ApplicationEventPublisher eventPublisher) {
         this.phoneRepository = phoneRepository;
         this.eventPublisher = eventPublisher;
     }
 
-        @Override
+    @Override
     public PhoneDTO getPhone(String phoneNumber) {
-            return phoneRepository.findById(phoneNumber).map(PhoneDTO::fromEntity).orElse(null);
+        return phoneRepository.findById(phoneNumber)
+                .map(PhoneDTO::fromEntity)
+                .orElse(null);
     }
 
     @Override
@@ -35,8 +37,9 @@ public class PhoneManagementServiceImpl implements PhoneManagementService{
     }
 
     @Override
+    @Transactional
     public Phone addPhone(String phoneNumber) {
-        if(phoneRepository.existsById(phoneNumber)){
+        if (phoneRepository.existsById(phoneNumber)) {
             return null;
         }
         Phone newPhone = new Phone(phoneNumber);
@@ -48,14 +51,24 @@ public class PhoneManagementServiceImpl implements PhoneManagementService{
     }
 
     @Override
+    @Transactional
     public boolean deletePhone(String phoneNumber) {
-        if (phoneRepository.existsById(phoneNumber)){
-            phoneRepository.deleteById(phoneNumber);
-
-            eventPublisher.publishEvent(new PhonesUpdatedEvent(this));
-
-            return true;
+        Phone phone = phoneRepository.findById(phoneNumber).orElse(null);
+        if (phone == null) {
+            return false;
         }
-        return false;
+
+        // Проверяем, не находится ли телефон в разговоре
+        if (phone.getActiveCall() != null) {
+            // Завершаем звонок перед удалением телефона
+            // Можно либо запретить удаление, либо автоматически завершить
+            // Для простоты запрещаем удаление
+            return false;
+        }
+
+        phoneRepository.deleteById(phoneNumber);
+        eventPublisher.publishEvent(new PhonesUpdatedEvent(this));
+
+        return true;
     }
 }

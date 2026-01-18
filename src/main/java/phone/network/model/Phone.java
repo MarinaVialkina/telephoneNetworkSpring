@@ -2,7 +2,6 @@ package phone.network.model;
 
 import javax.persistence.*;
 
-
 @Entity
 @Table(name = "phones")
 public class Phone {
@@ -12,9 +11,12 @@ public class Phone {
     @Enumerated(EnumType.STRING)
     private PhoneStatuses status;
 
-    @Embedded
-    private Call currentCall;
+    // Связь с активным звонком
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "active_call_id")
+    private Call activeCall;
 
+    // Constructors
     public Phone() {}
 
     public Phone(String phoneNumber) {
@@ -22,22 +24,21 @@ public class Phone {
         this.status = PhoneStatuses.FREE;
     }
 
-    public Phone(String phoneNumber, PhoneStatuses status, Call currentCall) {
-        this.phoneNumber = phoneNumber;
-        this.status = status;
-        this.currentCall = currentCall;
+    // Вспомогательный метод для получения номера собеседника
+    public String getOtherNumberInCall() {
+        if (activeCall == null) {
+            return null;
+        }
+        return activeCall.getOtherNumber(this.phoneNumber);
     }
 
+    // Getters and Setters
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
     public PhoneStatuses getStatus() { return status; }
-    public void setStatus(PhoneStatuses status) {
-        this.status = status;
-    }
+    public void setStatus(PhoneStatuses status) { this.status = status; }
 
-    public Call getCurrentCall() { return currentCall; }
-    public void setCurrentCall(Call currentCall) {
-        this.currentCall = currentCall;
-    }
+    public Call getActiveCall() { return activeCall; }
+    public void setActiveCall(Call activeCall) { this.activeCall = activeCall; }
 }
